@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santuario de Pensamientos</title>
+    <style>
+        :root {
+            --fire-color: #ff5e00;
+            --fire-light: #ffbb00;
+            --bg-dark: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        }
+
+        /* Fondo de partículas suaves */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .container {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            background: var(--glass);
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transition: all 0.5s ease;
+        }
+
+        h1 {
+            font-weight: 200;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            color: #ddd;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+        .input-area {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 20px;
+            color: #eee;
+            font-size: 1.1rem;
+            resize: none;
+            outline: none;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        textarea:focus {
+            border-color: var(--fire-color);
+            box-shadow: 0 0 15px rgba(255, 94, 0, 0.2);
+        }
+
+        /* Estilo de los Botones */
+        .btn-burn {
+            background: linear-gradient(45deg, #ff4e50, #f9d423);
+            border: none;
+            padding: 15px 40px;
+            color: #000;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(255, 78, 80, 0.3);
+        }
+
+        .btn-burn:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255, 78, 80, 0.5);
+        }
+
+        .btn-burn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-nav {
+            margin-top: 50px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .btn-nav:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        /* Animación de Fuego y Cenizas */
+        .fire-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .burning {
+            animation: burnText 2s forwards ease-in;
+        }
+
+        @keyframes burnText {
+            0% { opacity: 1; transform: scale(1); filter: brightness(1) blur(0); }
+            30% { color: #ff5e00; filter: brightness(1.5) blur(2px); }
+            100% { opacity: 0; transform: translateY(-20px) scale(1.1); filter: brightness(2) blur(10px); }
+        }
+
+        /* Efecto de partículas de fuego */
+        .particle {
+            position: absolute;
+            bottom: 0;
+            background: orange;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: rise 1.5s infinite ease-out;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-200px) scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="container" id="mainContainer">
+        <h1>Suelta tu carga, mi amor</h1>
+        
+        <div class="input-area" id="inputArea">
+            <textarea id="thoughtInput" placeholder="Escribe aquí aquello que deseas dejar ir..."></textarea>
+            <div class="fire-overlay" id="fireOverlay"></div>
+        </div>
+
+        <button class="btn-burn" onclick="burnProcess()">Quemar pensamiento/carga</button>
+    </div>
+
+    <button class="btn-nav" onclick="window.location.href='index.html'">Volver al Inicio (Index)</button>
+
+    <script>
+        // Fondo de partículas sutiles
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+
+        class BackgroundParticle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedY = -Math.random() * 0.5;
+                this.opacity = Math.random();
+            }
+            update() {
+                this.y += this.speedY;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 100; i++) {
+            particles.push(new BackgroundParticle());
+        }
+
+        function animateBg() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // Lógica de quemado
+        function burnProcess() {
+            const textarea = document.getElementById('thoughtInput');
+            const overlay = document.getElementById('fireOverlay');
+            if (textarea.value.trim() === "") return;
+
+            // Bloquear entrada
+            textarea.disabled = true;
+            textarea.classList.add('burning');
+            
+            // Crear llamas visuales
+            createFireParticles();
+
+            // Efecto de sonido (opcional, podrías añadir un mp3 de fuego)
+            
+            setTimeout(() => {
+                textarea.value = "";
+                textarea.classList.remove('burning');
+                textarea.disabled = false;
+                alert("El pensamiento se ha convertido en cenizas.");
+            }, 2000);
+        }
+
+        function createFireParticles() {
+            const container = document.getElementById('inputArea');
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const p = document.createElement('div');
+                    p.className = 'particle';
+                    const size = Math.random() * 10 + 5;
+                    p.style.width = size + 'px';
+                    p.style.height = size + 'px';
+                    p.style.left = Math.random() * 100 + '%';
+                    
+                    // Colores de fuego
+                    const colors = ['#ff5e00', '#ffbb00', '#ff0000', '#ffffff'];
+                    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    p.style.filter = 'blur(2px)';
+                    p.style.boxShadow = `0 0 10px ${p.style.background}`;
+                    
+                    container.appendChild(p);
+                    
+                    setTimeout(() => p.remove(), 1500);
+                }, i * 20);
+            }
+        }
+    </script>
+</body>
+</html>
