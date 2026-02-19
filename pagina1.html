@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Santuario de Paz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Quicksand:wght@300;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --accent: #ff80ab;
+            --neon-blue: #00f2ff;
+            --bg: #050508;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: white;
+            font-family: 'Quicksand', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none; /* Interactuamos vía window */
+        }
+
+        .main-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Música */
+        .music-player {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .play-btn {
+            background: var(--accent);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: white;
+        }
+
+        /* Hero */
+        .section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 5rem;
+            margin: 0;
+            background: linear-gradient(45deg, var(--accent), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(255,128,171,0.4));
+        }
+
+        /* Respiración Mejorada */
+        .breath-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .breath-circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--neon-blue);
+            border-radius: 50%;
+            animation: breatheCycle 12s infinite ease-in-out;
+            box-shadow: 0 0 50px var(--neon-blue);
+        }
+
+        @keyframes breatheCycle {
+            0%, 100% { transform: scale(0.5); border-color: var(--neon-blue); } /* Inhala */
+            33% { transform: scale(1.2); border-color: var(--accent); } /* Mantén */
+            66% { transform: scale(0.8); border-color: white; } /* Exhala */
+        }
+
+        #breath-instruction {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px white;
+        }
+
+        /* Burbujas */
+        .bubble-wrap {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .bubble {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        .bubble:active { transform: scale(0.9); }
+        .bubble.popped {
+            transform: scale(1.5);
+            opacity: 0;
+            pointer-events: none;
+            background: var(--accent);
+        }
+
+        /* Footer Botón Index */
+        .btn-index {
+            padding: 20px 50px;
+            font-size: 1.5rem;
+            background: none;
+            border: 2px solid var(--accent);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.4s;
+            margin-top: 50px;
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .btn-index:hover {
+            background: var(--accent);
+            box-shadow: 0 0 30px var(--accent);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            animation: bounce 2s infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+    </style>
+</head>
+<body>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="music-player">
+        <button class="play-btn" onclick="toggleMusic()" id="mBtn">▶</button>
+        <span style="font-size: 12px;">Melodía</span>
+        <audio id="track" loop src="musica.mp3"></audio>
+    </div>
+
+    <div class="main-wrapper">
+        
+        <section class="section">
+            <p>Mantén presionado en cualquier lugar...</p>
+            <h1>Para mi Amorcito tiquita c:</h1>
+            <p>Atrae las estrellas, suéltalas para crear magia :D.</p>
+            <div class="scroll-indicator">⬇ Desliza para más magia ⬇</div>
+        </section>
+
+        <section class="section">
+            <h2 style="margin-bottom: 50px; color: var(--neon-blue);">Sincroniza tu alma, calmandote</h2>
+            <div class="breath-container">
+                <div class="breath-circle"></div>
+                <div id="breath-instruction">Inhala...</div>
+            </div>
+        </section>
+
+        <section class="section" style="min-height: 150vh;">
+            <h2 style="color: var(--accent);">Pop Anti-Estrés jijiji c:</h2>
+            <p>burbuja reventada nalgada de ti para mí, muejeje ✨.</p>
+            <div class="bubble-wrap" id="bubbleGrid"></div>
+            <button onclick="resetPop()" style="background:none; border:1px solid gray; color:gray; cursor:pointer; margin-top:20px; border-radius:10px;">Reiniciar</button>
+        </section>
+
+        <section class="section">
+            <h2>Espero te sientas mejor, TE AMO💖</h2>
+            <p>Cada pequeña estrella que ves es un deseo para ti, mi tiquita ✨</p>
+            <button class="btn-index" onclick="location.href='index.html'">Volver al Inicio ✨</button>
+            <div style="height: 200px;"></div>
+        </section>
+
+    </div>
+
+    <script>
+        // --- MOTOR DE PARTÍCULAS (ATRACCIÓN Y EXPLOSIÓN) ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let isPressing = false;
+        let mouse = { x: 0, y: 0 };
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', init);
+        init();
+
+        class Particle {
+            constructor(x, y, isExplosion = false) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1;
+                this.baseX = x;
+                this.baseY = y;
+                this.vx = isExplosion ? (Math.random() - 0.5) * 20 : (Math.random() - 0.5) * 2;
+                this.vy = isExplosion ? (Math.random() - 0.5) * 20 : (Math.random() - 0.5) * 2;
+                this.color = `hsl(${Math.random() * 50 + 330}, 100%, 70%)`;
+                this.alpha = 1;
+            }
+            update() {
+                if (isPressing && !this.isExplosion) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    this.vx += dx * 0.01;
+                    this.vy += dy * 0.01;
+                }
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx *= 0.95;
+                this.vy *= 0.95;
+                this.alpha -= 0.01;
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function spawnParticles() {
+            if (isPressing) {
+                for(let i=0; i<3; i++) particles.push(new Particle(Math.random()*canvas.width, Math.random()*canvas.height));
+            }
+        }
+
+        function explode() {
+            for(let i=0; i<40; i++) {
+                particles.push(new Particle(mouse.x, mouse.y, true));
+            }
+        }
+
+        window.addEventListener('mousedown', (e) => { isPressing = true; mouse.x = e.clientX; mouse.y = e.clientY; });
+        window.addEventListener('mouseup', () => { isPressing = false; explode(); });
+        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        window.addEventListener('touchstart', (e) => { isPressing = true; mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; });
+        window.addEventListener('touchend', () => { isPressing = false; explode(); });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            spawnParticles();
+            particles.forEach((p, i) => {
+                p.update();
+                p.draw();
+                if (p.alpha <= 0) particles.splice(i, 1);
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // --- AUDIO SATISFACTORIO (SINTETIZADO) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playPopSound() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400 + Math.random() * 200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        // --- JUEGO BURBUJAS ---
+        const grid = document.getElementById('bubbleGrid');
+        function createGrid() {
+            grid.innerHTML = '';
+            for(let i=0; i<48; i++) {
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                b.onclick = function() {
+                    if(!this.classList.contains('popped')) {
+                        this.classList.add('popped');
+                        playPopSound();
+                    }
+                };
+                grid.appendChild(b);
+            }
+        }
+        createGrid();
+        function resetPop() { createGrid(); }
+
+        // --- LÓGICA RESPIRACIÓN ---
+        const breathLabel = document.getElementById('breath-instruction');
+        const cycle = () => {
+            breathLabel.innerText = "Inhala...";
+            setTimeout(() => { breathLabel.innerText = "Mantén..."; }, 4000);
+            setTimeout(() => { breathLabel.innerText = "Exhala..."; }, 8000);
+        };
+        cycle();
+        setInterval(cycle, 12000);
+
+        // --- MÚSICA ---
+        function toggleMusic() {
+            const track = document.getElementById('track');
+            const btn = document.getElementById('mBtn');
+            if (track.paused) { track.play(); btn.innerText = "⏸"; }
+            else { track.pause(); btn.innerText = "▶"; }
+        }
+    </script>
+</body>
+</html>
